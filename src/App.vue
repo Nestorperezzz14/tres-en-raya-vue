@@ -1,18 +1,49 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
-// El estado del tablero (9 casillas vacías al empezar)
 const tablero = ref(Array(9).fill(null))
-// El jugador que empieza
 const jugadorActual = ref('X')
+const ganador = ref(null)
 
-// Función que se ejecuta al hacer clic en una celda
+// Todas las combinaciones posibles para ganar
+const lineasGanadoras = [
+  [0, 1, 2],
+  [3, 4, 5],
+  [6, 7, 8], // Horizontales
+  [0, 3, 6],
+  [1, 4, 7],
+  [2, 5, 8], // Verticales
+  [0, 4, 8],
+  [2, 4, 6], // Diagonales
+]
+
+const comprobarGanador = () => {
+  for (let i = 0; i < lineasGanadoras.length; i++) {
+    const [a, b, c] = lineasGanadoras[i]
+    if (
+      tablero.value[a] &&
+      tablero.value[a] === tablero.value[b] &&
+      tablero.value[a] === tablero.value[c]
+    ) {
+      ganador.value = tablero.value[a]
+      return
+    }
+  }
+}
+
+// Si no hay ganador y todas las celdas están llenas, es empate
+const esEmpate = computed(() => {
+  return !ganador.value && tablero.value.every((celda) => celda !== null)
+})
+
 const realizarMovimiento = (indice) => {
-  // Solo ponemos marca si la celda está vacía
-  if (!tablero.value[indice]) {
+  if (!tablero.value[indice] && !ganador.value) {
     tablero.value[indice] = jugadorActual.value
-    // Cambiamos de jugador (Si era X, ahora O; y viceversa)
-    jugadorActual.value = jugadorActual.value === 'X' ? 'O' : 'X'
+    comprobarGanador()
+
+    if (!ganador.value) {
+      jugadorActual.value = jugadorActual.value === 'X' ? 'O' : 'X'
+    }
   }
 }
 </script>
@@ -20,7 +51,10 @@ const realizarMovimiento = (indice) => {
 <template>
   <div class="juego">
     <h1>Tres en Raya</h1>
-    <p>Turno del jugador: {{ jugadorActual }}</p>
+
+    <div v-if="ganador" class="mensaje-fin ganador">¡Ha ganado el jugador {{ ganador }}! 🎉</div>
+    <div v-else-if="esEmpate" class="mensaje-fin empate">¡Es un empate! 🤝</div>
+    <p v-else>Turno del jugador: {{ jugadorActual }}</p>
 
     <div class="tablero">
       <div v-for="(celda, i) in tablero" :key="i" class="celda" @click="realizarMovimiento(i)">
@@ -37,6 +71,17 @@ const realizarMovimiento = (indice) => {
   align-items: center;
   font-family: Arial, sans-serif;
   margin-top: 50px;
+}
+.mensaje-fin {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+.ganador {
+  color: #4caf50;
+}
+.empate {
+  color: #ff9800;
 }
 .tablero {
   display: grid;
