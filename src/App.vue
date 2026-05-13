@@ -5,16 +5,15 @@ const tablero = ref(Array(9).fill(null))
 const jugadorActual = ref('X')
 const ganador = ref(null)
 
-// Todas las combinaciones posibles para ganar
 const lineasGanadoras = [
   [0, 1, 2],
   [3, 4, 5],
-  [6, 7, 8], // Horizontales
+  [6, 7, 8],
   [0, 3, 6],
   [1, 4, 7],
-  [2, 5, 8], // Verticales
+  [2, 5, 8],
   [0, 4, 8],
-  [2, 4, 6], // Diagonales
+  [2, 4, 6],
 ]
 
 const comprobarGanador = () => {
@@ -31,7 +30,6 @@ const comprobarGanador = () => {
   }
 }
 
-// Si no hay ganador y todas las celdas están llenas, es empate
 const esEmpate = computed(() => {
   return !ganador.value && tablero.value.every((celda) => celda !== null)
 })
@@ -40,11 +38,17 @@ const realizarMovimiento = (indice) => {
   if (!tablero.value[indice] && !ganador.value) {
     tablero.value[indice] = jugadorActual.value
     comprobarGanador()
-
     if (!ganador.value) {
       jugadorActual.value = jugadorActual.value === 'X' ? 'O' : 'X'
     }
   }
+}
+
+// Función para resetear todo el estado
+const reiniciarJuego = () => {
+  tablero.value = Array(9).fill(null)
+  jugadorActual.value = 'X'
+  ganador.value = null
 }
 </script>
 
@@ -52,15 +56,17 @@ const realizarMovimiento = (indice) => {
   <div class="juego">
     <h1>Tres en Raya</h1>
 
-    <div v-if="ganador" class="mensaje-fin ganador">¡Ha ganado el jugador {{ ganador }}! 🎉</div>
-    <div v-else-if="esEmpate" class="mensaje-fin empate">¡Es un empate! 🤝</div>
-    <p v-else>Turno del jugador: {{ jugadorActual }}</p>
+    <div v-if="ganador" class="mensaje-fin ganador">¡Ha ganado {{ ganador }}! 🎉</div>
+    <div v-else-if="esEmpate" class="mensaje-fin empate">¡Empate! 🤝</div>
+    <p v-else>Turno de: {{ jugadorActual }}</p>
 
     <div class="tablero">
       <div v-for="(celda, i) in tablero" :key="i" class="celda" @click="realizarMovimiento(i)">
         {{ celda }}
       </div>
     </div>
+
+    <button class="btn-reinicio" @click="reiniciarJuego">Reiniciar Partida</button>
   </div>
 </template>
 
@@ -69,7 +75,7 @@ const realizarMovimiento = (indice) => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  font-family: Arial, sans-serif;
+  font-family: Arial;
   margin-top: 50px;
 }
 .mensaje-fin {
@@ -104,5 +110,19 @@ const realizarMovimiento = (indice) => {
 }
 .celda:hover {
   background-color: #f0f0f0;
+}
+
+.btn-reinicio {
+  margin-top: 20px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  background-color: #2196f3;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.btn-reinicio:hover {
+  background-color: #1976d2;
 }
 </style>
