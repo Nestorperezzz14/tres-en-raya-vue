@@ -5,6 +5,10 @@ const tablero = ref(Array(9).fill(null))
 const jugadorActual = ref('X')
 const ganador = ref(null)
 
+// Marcadores de puntuación
+const victoriasX = ref(0)
+const victoriasO = ref(0)
+
 const lineasGanadoras = [
   [0, 1, 2],
   [3, 4, 5],
@@ -25,6 +29,9 @@ const comprobarGanador = () => {
       tablero.value[a] === tablero.value[c]
     ) {
       ganador.value = tablero.value[a]
+      // Sumamos puntuación al ganador
+      if (ganador.value === 'X') victoriasX.value++
+      else victoriasO.value++
       return
     }
   }
@@ -44,7 +51,6 @@ const realizarMovimiento = (indice) => {
   }
 }
 
-// Función para resetear todo el estado
 const reiniciarJuego = () => {
   tablero.value = Array(9).fill(null)
   jugadorActual.value = 'X'
@@ -56,9 +62,20 @@ const reiniciarJuego = () => {
   <div class="juego">
     <h1>Tres en Raya</h1>
 
-    <div v-if="ganador" class="mensaje-fin ganador">¡Ha ganado {{ ganador }}! 🎉</div>
+    <div class="marcador">
+      <div class="puntos">
+        Jugador X: <span>{{ victoriasX }}</span>
+      </div>
+      <div class="puntos">
+        Jugador O: <span>{{ victoriasO }}</span>
+      </div>
+    </div>
+
+    <div v-if="ganador" class="mensaje-fin ganador">¡Ganador: {{ ganador }}! 🏆</div>
     <div v-else-if="esEmpate" class="mensaje-fin empate">¡Empate! 🤝</div>
-    <p v-else>Turno de: {{ jugadorActual }}</p>
+    <p v-else>
+      Turno de: <strong>{{ jugadorActual }}</strong>
+    </p>
 
     <div class="tablero">
       <div v-for="(celda, i) in tablero" :key="i" class="celda" @click="realizarMovimiento(i)">
@@ -66,7 +83,7 @@ const reiniciarJuego = () => {
       </div>
     </div>
 
-    <button class="btn-reinicio" @click="reiniciarJuego">Reiniciar Partida</button>
+    <button class="btn-reinicio" @click="reiniciarJuego">Nueva Partida</button>
   </div>
 </template>
 
@@ -75,8 +92,24 @@ const reiniciarJuego = () => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  font-family: Arial;
-  margin-top: 50px;
+  font-family: 'Segoe UI', Arial;
+  margin-top: 30px;
+}
+.marcador {
+  display: flex;
+  gap: 30px;
+  margin-bottom: 20px;
+  background: #eee;
+  padding: 10px 20px;
+  border-radius: 10px;
+}
+.puntos {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+.puntos span {
+  color: #2196f3;
+  font-size: 1.5rem;
 }
 .mensaje-fin {
   font-size: 1.5rem;
@@ -104,23 +137,25 @@ const reiniciarJuego = () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 2rem;
+  font-size: 2.5rem;
   font-weight: bold;
   cursor: pointer;
+  transition: 0.2s;
 }
 .celda:hover {
-  background-color: #f0f0f0;
+  background-color: #f9f9f9;
+  transform: scale(1.02);
 }
-
 .btn-reinicio {
   margin-top: 20px;
-  padding: 10px 20px;
+  padding: 12px 25px;
   font-size: 1rem;
   background-color: #2196f3;
   color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  font-weight: bold;
 }
 .btn-reinicio:hover {
   background-color: #1976d2;
